@@ -1,0 +1,61 @@
+streamlit
+yfinance
+pandas
+plotly
+import streamlit as st
+import plotly.graph_objects as go
+import pandas as pd
+from datetime import datetime
+
+st.set_page_config(page_title="시가총액 Top 10 - 3년 변화", layout="wide")
+
+st.title("🌍 전 세계 시가총액 Top 10 기업의 3년간 변화")
+st.write("Plotly를 이용한 인터랙티브 시각화입니다.")
+
+# 예시 데이터 (실제 데이터 아님. 원한다면 API 또는 수동 입력 필요)
+# 실사용 시, Yahoo Finance API 등에서 실시간 시가총액 데이터를 가져오세요.
+dates = pd.date_range(start="2022-01-01", periods=12, freq="Q")
+
+companies = ["Apple", "Microsoft", "Saudi Aramco", "Alphabet", "Amazon", 
+             "Nvidia", "Berkshire Hathaway", "Meta", "Tesla", "TSMC"]
+
+# 샘플 시가총액 데이터 생성
+import numpy as np
+np.random.seed(42)
+data = {company: np.cumsum(np.random.randn(len(dates)) * 100 + 1500) * 1e9 for company in companies}
+df = pd.DataFrame(data, index=dates)
+df = df.reset_index().rename(columns={"index": "Date"})
+
+# 사용자 그래프 타입 선택
+chart_type = st.radio("그래프 유형 선택", ["선형 그래프", "영역 그래프"])
+
+# Plotly 그래프 생성
+fig = go.Figure()
+
+for company in companies:
+    if chart_type == "선형 그래프":
+        fig.add_trace(go.Scatter(
+            x=df["Date"],
+            y=df[company],
+            mode="lines",
+            name=company
+        ))
+    else:
+        fig.add_trace(go.Scatter(
+            x=df["Date"],
+            y=df[company],
+            mode="lines",
+            name=company,
+            stackgroup="one"
+        ))
+
+fig.update_layout(
+    title="시가총액 변화 추이 (단위: 달러)",
+    xaxis_title="날짜",
+    yaxis_title="시가총액 ($)",
+    hovermode="x unified",
+    template="plotly_white",
+    height=600
+)
+
+st.plotly_chart(fig, use_container_width=True)
