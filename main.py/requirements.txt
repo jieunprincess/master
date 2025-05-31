@@ -1,0 +1,138 @@
+streamlit
+folium
+streamlit-folium
+pandas
+import streamlit as st
+import folium
+from streamlit_folium import folium_static
+import pandas as pd # 데이터 관리를 위해 pandas 사용 (기본 라이브러리로 간주)
+
+# 페이지 설정: 넓은 레이아웃과 사랑스러운 페이지 제목
+st.set_page_config(layout="wide", page_title="💖 ZEROBASEONE 멤버들의 우주 💖")
+
+# 앱 제목
+st.title("🌟 ZEROBASEONE 멤버들의 우주에 오신 것을 환영합니다! 🌟")
+st.markdown("---")
+
+st.write(
+    """
+    제로즈(ZEROS) 여러분, 안녕하세요! 이곳은 ZEROBASEONE 아홉 멤버들의 빛나는 매력을 탐험하는 공간입니다.
+    아래에서 멤버의 이름을 선택하고, 그들의 특별한 이야기와 사진을 만나보세요!
+    """
+)
+
+# --- 멤버 정보 데이터 ---
+# 각 멤버의 이름, 이미지 URL, 그리고 특징을 담은 딕셔너리 리스트
+# 이미지 URL은 공개적으로 접근 가능한 링크를 사용했습니다.
+members_data = [
+    {
+        "name": "성한빈",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Sung_Hanbin_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Sung_Hanbin_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "그룹의 리더이자 만능 포지션! 따뜻한 리더십과 뛰어난 퍼포먼스 실력을 겸비한 멤버입니다."
+    },
+    {
+        "name": "김지웅",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Kim_Jiwoong_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Kim_Jiwoong_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "맏형 라인의 비주얼 멤버! 깊은 눈빛과 카리스마로 팬심을 사로잡습니다."
+    },
+    {
+        "name": "장하오",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Zhang_Hao_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Zhang_Hao_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "센터이자 메인보컬! 바이올린 연주 실력과 매력적인 보이스를 자랑하는 올라운더입니다."
+    },
+    {
+        "name": "석매튜",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Seok_Matthew_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Seok_Matthew_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "활기찬 에너지와 밝은 미소가 매력적인 멤버! '캐나다 매튜'로도 불립니다."
+    },
+    {
+        "name": "김태래",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Kim_Taerae_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Kim_Taerae_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "메인보컬을 맡고 있는 감성 보컬! 폭발적인 가창력으로 귀를 즐겁게 합니다."
+    },
+    {
+        "name": "리키",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ricky_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Ricky_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "시크한 비주얼과 '영앤리치' 컨셉으로 사랑받는 멤버! 부드러운 목소리도 매력적입니다."
+    },
+    {
+        "name": "김규빈",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Kim_Gyuvin_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Kim_Gyuvin_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "시원시원한 피지컬과 눈부신 비주얼! 항상 밝고 유쾌한 에너지로 팀의 분위기를 띄웁니다."
+    },
+    {
+        "name": "박건욱",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Park_Gunwook_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Park_Gunwook_at_the_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "파워풀한 댄스와 안정적인 보컬을 겸비한 멤버! 강렬한 무대 장악력을 보여줍니다."
+    },
+    {
+        "name": "한유진",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Han_Yujin_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg/640px-Han_Yujin_at_MAMA_Awards_on_November_29%2C_2023_%28cropped%29.jpg",
+        "features": "그룹의 막내이자 성장캐! 풋풋한 매력과 잠재력으로 앞으로가 더욱 기대됩니다."
+    },
+]
+
+# Pandas DataFrame으로 변환하여 데이터 관리 용이하게 함
+df_members = pd.DataFrame(members_data)
+
+st.markdown("---")
+
+# --- 멤버 선택 및 정보 표시 섹션 ---
+st.subheader("💜 멤버 선택하기")
+
+# 멤버 이름만 추출하여 selectbox에 사용
+member_names = df_members['name'].tolist()
+selected_member_name = st.selectbox("어떤 멤버가 궁금하신가요?", member_names)
+
+# 선택된 멤버 정보 가져오기
+selected_member_data = df_members[df_members['name'] == selected_member_name].iloc[0]
+
+# 컬럼을 사용하여 레이아웃 분할 (사진과 특징)
+col1, col2 = st.columns([1, 2]) # 1:2 비율로 컬럼 분할
+
+with col1:
+    st.image(selected_member_data['image_url'], caption=selected_member_name, use_column_width=True)
+
+with col2:
+    st.markdown(f"## {selected_member_name}")
+    st.write(f"✨ **특징:** {selected_member_data['features']}")
+    st.write("")
+    st.write(f"_{selected_member_name}에게 더 많은 사랑과 응원 부탁드립니다!_")
+
+st.markdown("---")
+
+# --- Folium 지도 섹션 (사랑스러운 느낌 추가) ---
+st.subheader("🌍 ZEROBASEONE의 시작, 그리고 ZEROSE의 우주")
+st.write(
+    """
+    제로베이스원 멤버들이 빛나기 시작한 곳, 바로 서울입니다!
+    지도를 통해 그들의 빛나는 시작점을 확인해보세요.
+    """
+)
+
+# Folium 지도 생성 (서울 중심으로)
+# tiles="cartodbpositron"은 깔끔하고 예쁜 배경을 제공합니다.
+m = folium.Map(location=[37.5665, 126.9780], zoom_start=10, tiles="cartodbpositron")
+
+# 'ZEROBASEONE의 시작' 마커 추가 (사랑스러운 하트 아이콘)
+folium.Marker(
+    location=[37.5665, 126.9780], # 서울 시청 근처 위도, 경도
+    tooltip="ZEROBASEONE의 시작점 (서울)",
+    popup="🌟 ZEROBASEONE과 ZEROSE가 만난 곳 🌟",
+    icon=folium.Icon(color="purple", icon="heart", prefix='fa') # 하트 아이콘
+).add_to(m)
+
+# Streamlit에 Folium 지도 표시
+folium_static(m, width=700, height=500)
+
+st.markdown("---")
+
+# --- 앱 하단 메시지 ---
+st.markdown(
+    """
+    <div style="text-align: center; font-size: 1.2em; color: #ff69b4;">
+        💖 이 페이지가 ZEROBASEONE과 제로즈에게 작은 기쁨이 되기를 바랍니다! 💖
+    </div>
+    """,
+    unsafe_allow_html=True
+)
